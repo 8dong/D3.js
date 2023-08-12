@@ -1,6 +1,8 @@
 import { AppProps } from 'next/app'
 import { Global, css } from '@emotion/react'
 
+import PageLayoutView from '@components/view-assets/layouts/PayLayoutView'
+
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <>
@@ -198,7 +200,9 @@ const App = ({ Component, pageProps }: AppProps) => {
           }
         `}
       />
-      <Component {...pageProps} />
+      <PageLayoutView>
+        <Component {...pageProps} />
+      </PageLayoutView>
     </>
   )
 }
