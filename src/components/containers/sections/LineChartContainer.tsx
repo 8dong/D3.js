@@ -1,7 +1,7 @@
 import { FC, useEffect } from 'react'
 import * as d3 from 'd3'
 
-import BarChartView from '@components/view-assets/sections/BarChartView'
+import LineChartView from '@components/view-assets/sections/LineChartView'
 
 interface IProps {
   dataList: { xAxisData: string; yAxisData: number }[]
@@ -10,7 +10,7 @@ interface IProps {
   chartHeight: number
 }
 
-const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHeight }) => {
+const LineChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHeight }) => {
   const draw = () => {
     const xAxisDataList = dataList.map((data) => data.xAxisData)
     const yAxisDataList = dataList.map((data) => data.yAxisData)
@@ -23,11 +23,12 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     createXAxis(svg, chartHeight, xScale)
     createYAxis(svg, chartWidth, yScale)
 
-    createBars(svg, xScale, yScale, dataList)
-    const focusBg = createFocusBg(svg, chartHeight, xScale)
+    createSeriesLine(svg, dataList, xScale, yScale)
+
+    const focusArea = createFocusArea(svg, chartHeight)
     const tooltip = createTooltip(chartId)
 
-    svg.on('mousemove', (event: MouseEvent) =>
+    svg.on('mousemove', (event: MouseEvent) => {
       handleMouseMove(
         event,
         chartWidth,
@@ -35,11 +36,14 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
         xAxisDataList,
         yAxisDataList,
         xScale,
-        focusBg,
+        yScale,
+        focusArea,
         tooltip
       )
-    )
-    svg.on('mouseout', () => handleMouseOut(focusBg, tooltip))
+    })
+    svg.on('mouseout', () => {
+      handleMouseOut(focusArea, tooltip)
+    })
   }
 
   const createSvg = (chartId: string, chartWidth: number, chartHeight: number) => {
@@ -48,11 +52,7 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     chartArea.selectAll('svg').remove()
     chartArea.selectAll('.tooltip').remove()
 
-    return chartArea
-      .append('svg')
-      .attr('id', chartId)
-      .attr('width', chartWidth)
-      .attr('height', chartHeight)
+    return chartArea.append('svg').attr('width', chartWidth).attr('height', chartHeight)
   }
 
   const createXScale = (xAxisDataList: string[], chartWidth: number) => {
@@ -99,12 +99,12 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     svg
       .append('g')
       .call(d3.axisLeft(yScale).ticks(3))
-      .attr('transform', 'translate(30, 0)')
+      .attr('transform', `translate(30, 0)`)
       .call((g) => g.selectAll('.domain').remove())
       .call((g) =>
         g
           .selectAll('.tick > line')
-          .attr('x2', Number(chartWidth) - 30)
+          .attr('x2', chartWidth)
           .style('stroke', '#e4e4e4')
           .attr('stroke-width', '1px')
       )
@@ -119,39 +119,51 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
       )
   }
 
-  const createBars = (
+  const createSeriesLine = (
     svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
+    dataList: {
+      xAxisData: string
+      yAxisData: number
+    }[],
     xScale: d3.ScaleBand<string>,
-    yScale: d3.ScaleLinear<number, number, never>,
-    dataList: { xAxisData: string; yAxisData: number }[]
+    yScale: d3.ScaleLinear<number, number, never>
   ) => {
+    const lineGenerator = d3
+      .line()
+      .x((data) => data[0])
+      .y((data) => data[1])
+
+    const positionDataList = dataList.map((data) => [
+      (xScale(data.xAxisData) as number) + xScale.bandwidth() / 2,
+      yScale(data.yAxisData)
+    ])
+
     svg
       .append('g')
-      .selectAll('rect')
-      .data(dataList)
-      .enter()
-      .append('rect')
-      .attr('x', (data) => (xScale(data.xAxisData) as number) + xScale.bandwidth() / 2 - 15)
-      .attr('y', (data) => yScale(data.yAxisData))
-      .attr('width', 30)
-      .attr('height', (data) => yScale(0) - yScale(data.yAxisData))
-      .attr('fill', '#253FEB')
+      .append('path')
+      .data([positionDataList])
+      .attr('d', (data) => lineGenerator(data as [number, number][]))
+      .attr('fill', 'none')
+      .attr('stroke', '#253FEB')
+      .attr('stroke-width', 4)
   }
 
-  const createFocusBg = (
+  const createFocusArea = (
     svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
-    chartHeight: number,
-    xScale: d3.ScaleBand<string>
+    chartHeight: number
   ) => {
-    return svg
-      .append('rect')
-      .attr('class', 'hover-background')
-      .attr('width', xScale.bandwidth())
-      .attr('x', 30)
-      .attr('y', 30)
-      .attr('height', Number(chartHeight) - 60)
-      .style('fill', 'rgba(214, 222, 232, 0.3)')
-      .style('opacity', '0')
+    const focuseArea = svg.append('g').style('opacity', 0)
+
+    focuseArea
+      .append('line')
+      .attr('y1', 30)
+      .attr('y2', chartHeight - 30)
+      .attr('stroke', '#b7b7b7')
+      .attr('stroke-width', '2px')
+
+    focuseArea.append('circle').attr('r', 7).style('fill', '#4E63EF')
+
+    return focuseArea
   }
 
   const createTooltip = (chartId: string) => {
@@ -174,16 +186,31 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     xAxisDataList: string[],
     yAxisDataList: number[],
     xScale: d3.ScaleBand<string>,
-    focusBg: d3.Selection<SVGRectElement, unknown, HTMLElement, any>,
+    yScale: d3.ScaleLinear<number, number, never>,
+    focuseArea: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
     tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>
   ) => {
     const currentIndex =
-      d3.bisect(xAxisDataList.map((xAxisData) => xScale(xAxisData)) as number[], event.offsetX, 1) -
-      1
+      d3.bisect(
+        xAxisDataList.map((xAxisData) => xScale(xAxisData) as number),
+        event.offsetX,
+        1
+      ) - 1
 
-    focusBg
-      .attr('transform', `translate(${(xScale(xAxisDataList[currentIndex]) as number) - 30}, 0)`)
-      .style('opacity', 1)
+    focuseArea
+      .selectAll('line')
+      .attr(
+        'transform',
+        `translate(${(xScale(xAxisDataList[currentIndex]) as number) + xScale.bandwidth() / 2}, 0)`
+      )
+    focuseArea
+      .selectAll('circle')
+      .attr(
+        'transform',
+        `translate(${
+          (xScale(xAxisDataList[currentIndex]) as number) + xScale.bandwidth() / 2
+        }, ${yScale(yAxisDataList[currentIndex])})`
+      )
 
     const tooltipTopPosition =
       event.offsetY >= chartHeight / 2 ? event.clientY + 50 : event.clientY - 130
@@ -192,17 +219,16 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     tooltip.style('top', `${tooltipTopPosition}px`).style('left', `${tooltipLeftPosition}px`)
     tooltip.select('.tooltip-label').text(`Label : ${xAxisDataList[currentIndex]}`)
     tooltip.select('.tooltip-amount').text(`Amount : ${yAxisDataList[currentIndex]}`)
-    tooltip
-      .style('top', `${tooltipTopPosition}px`)
-      .style('left', `${tooltipLeftPosition}px`)
-      .style('opacity', 1)
+
+    focuseArea.style('opacity', 1)
+    tooltip.style('opacity', 1)
   }
 
   const handleMouseOut = (
-    focusBg: d3.Selection<SVGRectElement, unknown, HTMLElement, any>,
+    focuseArea: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
     tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>
   ) => {
-    focusBg.style('opacity', 0)
+    focuseArea.style('opacity', 0)
     tooltip.style('opacity', 0)
   }
 
@@ -210,7 +236,7 @@ const BarChartContainer: FC<IProps> = ({ dataList, chartId, chartWidth, chartHei
     draw()
   }, [dataList])
 
-  return <BarChartView chartId={chartId} />
+  return <LineChartView chartId={chartId} />
 }
 
-export default BarChartContainer
+export default LineChartContainer
