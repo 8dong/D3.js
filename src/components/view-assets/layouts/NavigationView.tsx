@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, ReactNode } from 'react'
 import styled from '@emotion/styled'
 
 import BarChartIcon from '@images/icons/BarChart'
@@ -7,6 +7,7 @@ interface IProps {
   navItems: {
     name: string
     pathname: string
+    icon: ReactNode
   }[]
   currentPath: string
   handleClickNavItem: (url: string) => void
@@ -22,7 +23,7 @@ const NavigationView: FC<IProps> = ({ navItems, currentPath, handleClickNavItem 
             onClick={() => handleClickNavItem(navItem.pathname)}
             isActive={currentPath === navItem.pathname}
           >
-            <BarChartIcon />
+            {navItem.icon}
             <$navItemName isActive={currentPath === navItem.pathname}>{navItem.name}</$navItemName>
           </$navItemArea>
         ))}
@@ -97,5 +98,9 @@ const inActiveItemListStyle = `
 
   & > svg {
     fill: #dfe4f0;
+
+    path {
+      stroke: #dfe4f0;
+    }
   }
 `

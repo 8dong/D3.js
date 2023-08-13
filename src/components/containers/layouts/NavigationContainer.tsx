@@ -1,16 +1,24 @@
-import { FC, useCallback, useMemo } from 'react'
+import { FC, ReactNode, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 
 import NavigationView from '@components/view-assets/layouts/NavigationView'
+import BarChartIcon from '@images/icons/BarChart'
+import LineChartIcon from '@images/icons/LineChart'
 
 const NavigationContainer: FC = () => {
   const router = useRouter()
 
-  const navItems: { name: string; pathname: string }[] = useMemo(
+  const navItems: { name: string; pathname: string; icon: ReactNode }[] = useMemo(
     () => [
       {
         name: 'Bar',
-        pathname: '/bar-chart'
+        pathname: '/bar-chart',
+        icon: <BarChartIcon />
+      },
+      {
+        name: 'Line',
+        pathname: '/line-chart',
+        icon: <LineChartIcon />
       }
     ],
     []

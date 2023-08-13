@@ -174,3 +174,42 @@ const handleMouseMove = (event: MouseEvent) => {
     ) - 1
 }
 ```
+
+## Generator
+
+### Lines
+
+```js
+import * as d3 from 'd3'
+
+const createSeriesLine = (
+  svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>,
+  xSacle: d3.ScaleBand<string>,
+  yScale: d3.ScaleLinear<number, number, never>,
+  dataList: { xAxisData: string, yAxisData: number }[]
+) => {
+  // [x좌표, y좌표]를 요소로 갖는 배열
+  const positionValueList = dataList.map((data) => [
+    xScale(data.xAxisData),
+    yScale(data.yAxisData)
+  ]);
+
+  // d3.line().x(Function).y(Function)
+  // 선 그래프(line chart)를 생성하기 위해 사용되는 함수. 선 그래프는 데이터 포인트를 선으로 연결하여 데이터의 추이나 패턴을 시각화하는데 사용
+  // line을 생성하는 path 요소의 d 어트리뷰트 값을 반환
+  const lineGenerator = d3
+    .line()
+    // x 좌표
+    .x((data) => data[0])
+    // y 좌표
+    .y((data) => data[1]);
+
+  return (
+    svg
+      .append('g')
+      .append('path')
+      .data([positionValueList])
+      .attr('d', (positionValue) => lineGenerator(positionValue))
+  );
+};
+```
