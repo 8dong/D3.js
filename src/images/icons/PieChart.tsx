@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import styled from '@emotion/styled'
 
-const BarChartIcon: FC = () => {
+const PieChartIcon: FC = () => {
   return (
     <$svg
       xmlns="http://www.w3.org/2000/svg"
@@ -14,14 +14,13 @@ const BarChartIcon: FC = () => {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <rect x="1" y="10" width="7" height="10" rx="2" ry="2" />
-      <rect x="8" y="4" width="7" height="16" rx="2" ry="2" />
-      <rect x="15" y="7" width="7" height="13" rx="2" ry="2" />
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2v10l4.8 2.4" />
     </$svg>
   )
 }
 
-export default BarChartIcon
+export default PieChartIcon
 
 const $svg = styled.svg`
   vertical-align: middle;

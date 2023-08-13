@@ -1,8 +1,6 @@
 import { FC, ReactNode } from 'react'
 import styled from '@emotion/styled'
 
-import BarChartIcon from '@images/icons/BarChart'
-
 interface IProps {
   navItems: {
     name: string
@@ -57,7 +55,7 @@ const $navItemArea = styled.li<{ isActive: boolean }>`
   align-items: center;
   border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.5s ease-in-out;
+  transition: background-color 0.3s ease-in-out;
 
   &:last-of-type {
     margin-bottom: 0;
@@ -65,7 +63,7 @@ const $navItemArea = styled.li<{ isActive: boolean }>`
 
   & > svg {
     margin-bottom: 5px;
-    transition: fill 0.5s ease-in-out;
+    transition: fill 0.3s ease-in-out;
   }
 
   ${(props) => (props.isActive ? activeListItemStyle : inActiveItemListStyle)}
@@ -89,18 +87,11 @@ const activeListItemStyle = `
 
   & > svg {
     fill: #fff;
+    stroke: #A4AABB;
   }
 `
 
 const inActiveItemListStyle = `
   border: solid 1px #dfe4f0;
   background-color: #fff;
-
-  & > svg {
-    fill: #dfe4f0;
-
-    path {
-      stroke: #dfe4f0;
-    }
-  }
 `
