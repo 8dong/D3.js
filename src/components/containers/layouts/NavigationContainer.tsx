@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import NavigationView from '@components/view-assets/layouts/NavigationView'
 import BarChartIcon from '@images/icons/BarChart'
 import LineChartIcon from '@images/icons/LineChart'
+import PieChartIcon from '@images/icons/PieChart'
 
 const NavigationContainer: FC = () => {
   const router = useRouter()
@@ -19,6 +20,11 @@ const NavigationContainer: FC = () => {
         name: 'Line',
         pathname: '/line-chart',
         icon: <LineChartIcon />
+      },
+      {
+        name: 'Pie',
+        pathname: '/pie-chart',
+        icon: <PieChartIcon />
       }
     ],
     []
