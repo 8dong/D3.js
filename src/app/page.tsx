@@ -1,9 +1,5 @@
-import Layout from '@/shared/components/Layout';
+import { redirect } from 'next/navigation';
 
 export default function Page() {
-  return (
-    <div>
-      <Layout title='home'>Home</Layout>
-    </div>
-  );
+  redirect('/bar-chart');
 }
