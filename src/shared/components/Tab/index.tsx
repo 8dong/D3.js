@@ -14,8 +14,8 @@ const NAV_LIST: {
   icon?: { src: string; alt: string; width: number; height: number };
 }[] = [
   {
-    label: 'Home',
-    href: '/'
+    label: 'Bar',
+    href: '/bar-chart'
   }
 ];
 
