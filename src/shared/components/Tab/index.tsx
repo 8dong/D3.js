@@ -16,6 +16,10 @@ const NAV_LIST: {
   {
     label: 'Bar',
     href: '/bar-chart'
+  },
+  {
+    label: 'Line',
+    href: '/line-chart'
   }
 ];
 
