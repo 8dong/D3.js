@@ -20,6 +20,10 @@ const NAV_LIST: {
   {
     label: 'Line',
     href: '/line-chart'
+  },
+  {
+    label: 'Pie',
+    href: '/pie-chart'
   }
 ];
 
