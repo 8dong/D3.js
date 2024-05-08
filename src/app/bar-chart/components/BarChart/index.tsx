@@ -12,7 +12,8 @@ interface BarChartProps {
 }
 
 export default function BarChart({ id, chartInnerPadding, chartDataList }: BarChartProps) {
-  const chartAreElRef = useRef<HTMLDivElement>(null);
+  const chartAreaElRef = useRef<HTMLDivElement>(null);
+  const isFirstComeRef = useRef<boolean>(true);
 
   const drawChart = (
     id: string,
@@ -207,26 +208,34 @@ export default function BarChart({ id, chartInnerPadding, chartDataList }: BarCh
     d3.select(`.${styles.tooltip}`).style('opacity', '0');
   };
 
+  const observer = new ResizeObserver(() => {
+    if (!chartAreaElRef.current) return;
+
+    drawChart(id, chartInnerPadding, chartDataList);
+  });
+
   useEffect(() => {
+    if (isFirstComeRef.current) return;
+
     drawChart(id, chartInnerPadding, chartDataList);
   }, [id, chartInnerPadding, chartDataList]);
 
   useEffect(() => {
-    if (!chartAreElRef.current) return;
+    if (!chartAreaElRef.current || !isFirstComeRef.current) return;
 
-    const observer = new ResizeObserver(() => {
-      drawChart(id, chartInnerPadding, chartDataList);
-    });
+    isFirstComeRef.current = false;
 
-    observer.observe(chartAreElRef.current);
+    observer.observe(chartAreaElRef.current);
 
     return () => {
-      observer.disconnect();
+      if (!chartAreaElRef.current || !isFirstComeRef.current) return;
+
+      observer.unobserve(chartAreaElRef.current);
     };
-  }, [id, chartInnerPadding, chartDataList]);
+  }, []);
 
   return (
-    <div id={id} ref={chartAreElRef} className={styles.area}>
+    <div id={id} ref={chartAreaElRef} className={styles.area}>
       <div className={styles.tooltip}>
         <span className={styles.tooltipContent}></span>
       </div>

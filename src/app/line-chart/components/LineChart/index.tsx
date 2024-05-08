@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
 import * as styles from '@/app/line-chart/components/LineChart/style.css';
@@ -12,6 +12,9 @@ interface LineChartProps {
 }
 
 export default function LineChart({ id, chartInnerPadding, chartDataList }: LineChartProps) {
+  const chartAreaElRef = useRef<HTMLDivElement>(null);
+  const isFirstComeRef = useRef<boolean>(true);
+
   const drawChart = (
     id: string,
     chartInnerPadding: { top: number; right: number; bottom: number; left: number },
@@ -261,12 +264,34 @@ export default function LineChart({ id, chartInnerPadding, chartDataList }: Line
     verticalLine.style('opacity', '0');
   };
 
+  const observer = new ResizeObserver(() => {
+    if (!chartAreaElRef.current) return;
+
+    drawChart(id, chartInnerPadding, chartDataList);
+  });
+
   useEffect(() => {
+    if (isFirstComeRef.current) return;
+
     drawChart(id, chartInnerPadding, chartDataList);
   }, [id, chartInnerPadding, chartDataList]);
 
+  useEffect(() => {
+    if (!chartAreaElRef.current || !isFirstComeRef.current) return;
+
+    isFirstComeRef.current = false;
+
+    observer.observe(chartAreaElRef.current);
+
+    return () => {
+      if (!chartAreaElRef.current || !isFirstComeRef.current) return;
+
+      observer.unobserve(chartAreaElRef.current);
+    };
+  }, []);
+
   return (
-    <div id={id} className={styles.area}>
+    <div ref={chartAreaElRef} id={id} className={styles.area}>
       <div className={styles.tooltip}>
         <span className={styles.tooltipContent}></span>
       </div>
