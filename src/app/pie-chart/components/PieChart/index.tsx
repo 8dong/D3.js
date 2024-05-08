@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
 import * as styles from '@/app/pie-chart/components/PieChart/style.css';
@@ -12,6 +12,9 @@ interface PieChartProps {
 }
 
 export default function PieChart({ id, chartInnerPadding, chartDataList }: PieChartProps) {
+  const chartAreaElRef = useRef<HTMLDivElement>(null);
+  const isFirstComeRef = useRef<boolean>(true);
+
   const drawChart = (
     id: string,
     chartInnerPadding: { top: number; right: number; bottom: number; left: number },
@@ -150,12 +153,34 @@ export default function PieChart({ id, chartInnerPadding, chartDataList }: PieCh
     tooltipEl.style('opacity', '0');
   };
 
+  const observer = new ResizeObserver(() => {
+    if (!chartAreaElRef.current) return;
+
+    drawChart(id, chartInnerPadding, chartDataList);
+  });
+
   useEffect(() => {
+    if (isFirstComeRef.current) return;
+
     drawChart(id, chartInnerPadding, chartDataList);
   }, [id, chartInnerPadding, chartDataList]);
 
+  useEffect(() => {
+    if (!chartAreaElRef.current || !isFirstComeRef.current) return;
+
+    isFirstComeRef.current = false;
+
+    observer.observe(chartAreaElRef.current);
+
+    return () => {
+      if (!chartAreaElRef.current || !isFirstComeRef.current) return;
+
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div id={id} className={styles.area}>
+    <div ref={chartAreaElRef} id={id} className={styles.area}>
       <div className={styles.tooltip}>
         <span className={styles.tooltipContent}></span>
       </div>
