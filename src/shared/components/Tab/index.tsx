@@ -24,6 +24,10 @@ const NAV_LIST: {
   {
     label: 'Pie',
     href: '/pie-chart'
+  },
+  {
+    label: 'Polygon',
+    href: '/polygon-chart'
   }
 ];
 

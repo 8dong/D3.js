@@ -36,6 +36,11 @@ export const navItem = style({
 });
 
 export const navItemText = style({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  height: '100%',
   color: '#A4AABB',
   textAlign: 'center'
 });
